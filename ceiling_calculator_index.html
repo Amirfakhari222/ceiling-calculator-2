@@ -1,0 +1,123 @@
+
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+<meta charset="UTF-8">
+<title>ماشین‌حساب سقف کاذب 60×60 (نصف سقف)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+    body { font-family: "Tahoma", sans-serif; direction: rtl; background: #f9f9f9; margin: 0; padding: 0; }
+    .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    h2 { text-align: center; color: #333; }
+    label { display: block; margin-top: 10px; font-weight: bold; }
+    input { padding: 8px; margin-top: 5px; width: 100%; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+    button { padding: 10px; margin-top: 15px; width: 100%; background: #28a745; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; }
+    button:hover { background: #218838; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    table, th, td { border: 1px solid #ddd; }
+    th, td { padding: 10px; text-align: center; }
+    th { background: #f0f0f0; }
+    .actions { display: flex; gap: 10px; margin-top: 10px; }
+    .actions button { flex: 1; background: #007bff; }
+    .actions button:hover { background: #0069d9; }
+    @media print {
+        button, .actions { display: none; }
+        body { background: white; }
+        .container { box-shadow: none; border: none; }
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>ماشین‌حساب سقف کاذب 60×60 (نصف سقف)</h2>
+    <p>مساحت یا طول و عرض را وارد کنید. اگر طول و عرض را خالی بگذارید، برنامه مساحت را مربع فرض می‌کند.</p>
+
+    <label>مساحت کلی (متر مربع):</label>
+    <input type="number" id="area" step="0.1" placeholder="مثلا 20">
+
+    <label>طول (متر) - اختیاری:</label>
+    <input type="number" id="length" step="0.1" placeholder="مثلا 6">
+
+    <label>عرض (متر) - اختیاری:</label>
+    <input type="number" id="width" step="0.1" placeholder="مثلا 4">
+
+    <button onclick="calculate()">محاسبه</button>
+
+    <div id="result"></div>
+
+    <div class="actions" style="display:none;" id="actionBtns">
+        <button onclick="window.print()">پرینت / ذخیره PDF</button>
+        <button onclick="resetForm()">محاسبه جدید</button>
+    </div>
+</div>
+
+<script>
+function calculate() {
+    let area = parseFloat(document.getElementById("area").value);
+    let length = parseFloat(document.getElementById("length").value);
+    let width = parseFloat(document.getElementById("width").value);
+
+    const tileSize = 0.6;
+    const hangerSpacing = 1.2;
+    const wastePct = 0.05;
+    const dropLength = 0.5;
+
+    if ((!area || area <= 0) && (!length || length <= 0 || !width || width <= 0)) {
+        document.getElementById("result").innerHTML = "<p style='color:red;'>لطفا یا مساحت یا طول و عرض را وارد کنید.</p>";
+        return;
+    }
+
+    let halfArea;
+    if (!length || !width) {
+        halfArea = area / 2;
+        length = Math.sqrt(halfArea);
+        width = length;
+    } else {
+        halfArea = (length * width) / 2;
+    }
+
+    const tileArea = tileSize * tileSize;
+    const tilesNeeded = Math.ceil(halfArea / tileArea);
+    const tilesWithWaste = Math.ceil(tilesNeeded * (1 + wastePct));
+
+    const cellsX = Math.ceil(width / tileSize);
+    const cellsY = Math.ceil(length / tileSize);
+    const gridLinesX = cellsX + 1;
+    const gridLinesY = cellsY + 1;
+
+    const totalMainLen = (gridLinesX * length).toFixed(2);
+    const totalCrossLen = (gridLinesY * width).toFixed(2);
+    const wallAngleLen = (2 * (length + width)).toFixed(2);
+
+    const hangersCount = Math.ceil((length / hangerSpacing) * (width / hangerSpacing));
+    const hangerWireLen = (hangersCount * dropLength).toFixed(2);
+
+    document.getElementById("result").innerHTML = `
+        <table>
+            <tr><th>آیتم</th><th>مقدار</th></tr>
+            <tr><td>نصف مساحت (m²)</td><td>${halfArea.toFixed(2)}</td></tr>
+            <tr><td>تعداد تایل لازم</td><td>${tilesNeeded}</td></tr>
+            <tr><td>تعداد تایل با ضایعات</td><td>${tilesWithWaste}</td></tr>
+            <tr><td>طول تی اصلی (m)</td><td>${totalMainLen}</td></tr>
+            <tr><td>طول تی فرعی (m)</td><td>${totalCrossLen}</td></tr>
+            <tr><td>طول وال‌انگل (m)</td><td>${wallAngleLen}</td></tr>
+            <tr><td>تعداد آویز</td><td>${hangersCount}</td></tr>
+            <tr><td>طول سیم آویز (m)</td><td>${hangerWireLen}</td></tr>
+        </table>
+    `;
+
+    document.getElementById("actionBtns").style.display = "flex";
+}
+
+function resetForm() {
+    document.getElementById("area").value = "";
+    document.getElementById("length").value = "";
+    document.getElementById("width").value = "";
+    document.getElementById("result").innerHTML = "";
+    document.getElementById("actionBtns").style.display = "none";
+}
+</script>
+
+</body>
+</html>
